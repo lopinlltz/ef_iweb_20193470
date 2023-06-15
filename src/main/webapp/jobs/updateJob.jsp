@@ -15,7 +15,7 @@
                 <div class="col-md-6">
                     <h1 class='mb-3'>Editar un trabajo</h1>
                     <jsp:include page="../includes/infoMsgs.jsp" />
-                    <form method="POST" action="<%=request.getContextPath()%>/JobServlet?action=crear">
+                    <form method="POST" action="<%=request.getContextPath()%>/JobServlet?action=guardar">
                         <input type="hidden" class="form-control" name="id" value="<%=job.getJobId()%>">
                         <div class="mb-3">
                             <label class="form-label">Job Title</label>
