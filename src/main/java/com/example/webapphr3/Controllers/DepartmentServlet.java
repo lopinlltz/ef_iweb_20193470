@@ -29,75 +29,70 @@ public class DepartmentServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        HttpSession session = request.getSession();
-        Employee em = (Employee) session.getAttribute("employee");
+        String action = request.getParameter("action") == null ? "lista" : request.getParameter("action");
 
-        if (em == null) {
-            response.sendRedirect(request.getContextPath());
-        } else {
-            String action = request.getParameter("action") == null ? "lista" : request.getParameter("action");
+        DepartmentDao departmentDao = new DepartmentDao();
+        LocationDao locationDao = new LocationDao();
+        EmployeeDao employeeDao = new EmployeeDao();
+        RequestDispatcher view;
+        Department department;
+        int departmentId;
 
-            DepartmentDao departmentDao = new DepartmentDao();
-            LocationDao locationDao = new LocationDao();
-            EmployeeDao employeeDao = new EmployeeDao();
-            RequestDispatcher view;
-            Department department;
-            int departmentId;
+        switch (action) {
+            case "formCrear":
+                request.setAttribute("listaLocations", locationDao.listar());
+                request.setAttribute("listaEmpleados", employeeDao.listarEmpleados());
+                view = request.getRequestDispatcher("department/newDepartment.jsp");
+                view.forward(request, response);
+                break;
+            case "crear":
+                departmentId = Integer.parseInt(request.getParameter("id"));
+                String departmentName = request.getParameter("departmentName");
+                int managerId = Integer.parseInt(request.getParameter("managerId"));
+                int locationId = Integer.parseInt(request.getParameter("locationId"));
 
-            switch (action) {
-                case "formCrear":
-                    request.setAttribute("listaLocations",locationDao.listar());
-                    request.setAttribute("listaEmpleados",employeeDao.listarEmpleados());
-                    view = request.getRequestDispatcher("department/newDepartment.jsp");
-                    view.forward(request, response);
-                    break;
-                case "crear":
-                    departmentId = Integer.parseInt(request.getParameter("id"));
-                    String departmentName = request.getParameter("departmentName");
-                    int managerId = Integer.parseInt(request.getParameter("managerId"));
-                    int locationId = Integer.parseInt(request.getParameter("locationId"));
+                department = departmentDao.obtener(departmentId);
 
-                    department = departmentDao.obtener(departmentId);
+                if (department == null) {
+                    departmentDao.crear(departmentId, departmentName, managerId, locationId);
+                } else {
+                    departmentDao.actualizar(departmentId, departmentName, managerId, locationId);
+                }
+                response.sendRedirect(request.getContextPath() + "/DepartmentServlet");
+                break;
+            case "lista":
+                ArrayList<Department> lista = departmentDao.listaDepartamentos();
 
-                    if (department == null) {
-                        departmentDao.crear(departmentId, departmentName, managerId, locationId);
-                    } else {
-                        departmentDao.actualizar(departmentId, departmentName, managerId, locationId);
-                    }
+                request.setAttribute("lista", lista);
+
+                view = request.getRequestDispatcher("department/listaDepartment.jsp");
+                view.forward(request, response);
+                break;
+
+            case "editar":
+                departmentId = Integer.parseInt(request.getParameter("id"));
+                department = departmentDao.obtener(departmentId);
+                if (department == null) {
                     response.sendRedirect(request.getContextPath() + "/DepartmentServlet");
-                    break;
-                case "lista":
-                    ArrayList<Department> lista = departmentDao.listaDepartamentos();
-
-                    request.setAttribute("lista", lista);
-
-                    view = request.getRequestDispatcher("department/listaDepartment.jsp");
+                } else {
+                    request.setAttribute("listaLocations", locationDao.listar());
+                    request.setAttribute("listaEmpleados", employeeDao.listarEmpleados());
+                    request.setAttribute("department", department);
+                    view = request.getRequestDispatcher("department/updateDepartment.jsp");
                     view.forward(request, response);
-                    break;
-
-                case "editar":
-                    departmentId = Integer.parseInt(request.getParameter("id"));
-                    department = departmentDao.obtener(departmentId);
-                    if (department == null) {
-                        response.sendRedirect(request.getContextPath() + "/DepartmentServlet");
-                    } else {
-                        request.setAttribute("listaLocations",locationDao.listar());
-                        request.setAttribute("listaEmpleados",employeeDao.listarEmpleados());
-                        request.setAttribute("department", department);
-                        view = request.getRequestDispatcher("department/updateDepartment.jsp");
-                        view.forward(request, response);
-                    }
-                    break;
-                case "borrar":
-                    departmentId = Integer.parseInt(request.getParameter("id"));
-                    if (departmentDao.obtener(departmentId) != null) {
-                        departmentDao.borrar(departmentId);
-                    }
-                    response.sendRedirect(request.getContextPath() + "/DepartmentServlet");
-                    break;
-            }
+                }
+                break;
+            case "borrar":
+                departmentId = Integer.parseInt(request.getParameter("id"));
+                if (departmentDao.obtener(departmentId) != null) {
+                    departmentDao.borrar(departmentId);
+                }
+                response.sendRedirect(request.getContextPath() + "/DepartmentServlet");
+                break;
         }
+        
     }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
