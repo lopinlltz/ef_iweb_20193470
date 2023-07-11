@@ -23,7 +23,6 @@ public class EmployeeDao extends DaoBase {
             while (rs.next()) {
                 Employee employee = new Employee();
                 fetchEmployeeData(employee, rs);
-
                 listaEmpleados.add(employee);
             }
         } catch (SQLException ex) {
@@ -108,7 +107,6 @@ public class EmployeeDao extends DaoBase {
              PreparedStatement pstmt = conn.prepareStatement(sql);) {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
-
             try (ResultSet rs = pstmt.executeQuery();) {
                 if (rs.next()) {
                     int employeeId = rs.getInt(1);
@@ -121,6 +119,12 @@ public class EmployeeDao extends DaoBase {
         }
 
         return employee;
+    }
+
+    public Employee obtenerDetallesSesion() {
+        Employee datos = null;
+
+        return datos;
     }
 
     public ArrayList<EmpleadosPorRegionDto> listaEmpleadosPorRegion() {
@@ -151,6 +155,13 @@ public class EmployeeDao extends DaoBase {
         return lista;
     }
 
+    //sql
+    // select r.region_name, d.department_id, d.department_name, max(e.salary) as 'salario_max' from employees e
+    //inner join departments d on (e.department_id = d.department_id)
+    //inner join locations l on (l.location_id = d.location_id)
+    //inner join countries c on (c.country_id = l.country_id)
+    //inner join regions r on (c.region_id = r.region_id)
+    //group by e.employee_id;
 
     private void setEmployeeParams(PreparedStatement pstmt, Employee employee) throws SQLException {
         pstmt.setString(1, employee.getFirstName());
